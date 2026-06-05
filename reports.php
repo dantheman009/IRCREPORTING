@@ -56,10 +56,14 @@ function renderBundleReportHtml(array $rows, array $totals, string $dateFrom, st
                 <th style="border:1px solid #333;padding:6px;background:#efefef;text-align:left;font-weight:700;">SKU</th>
                 <th style="border:1px solid #333;padding:6px;background:#efefef;text-align:left;font-weight:700;">Name</th>
                 <th style="border:1px solid #333;padding:6px;background:#efefef;text-align:left;font-weight:700;">Size</th>
-                <th style="border:1px solid #333;padding:6px;background:#efefef;text-align:right;font-weight:700;">Reg Price</th>
-                <th style="border:1px solid #333;padding:6px;background:#efefef;text-align:right;font-weight:700;">Sale Price</th>
+                <?php if ($showUnitPrice): ?>
+                    <th style="border:1px solid #333;padding:6px;background:#efefef;text-align:right;font-weight:700;">Reg Price</th>
+                    <th style="border:1px solid #333;padding:6px;background:#efefef;text-align:right;font-weight:700;">Sale Price</th>
+                <?php endif; ?>
                 <th style="border:1px solid #333;padding:6px;background:#efefef;text-align:right;font-weight:700;">Promo Sales</th>
-                <th style="border:1px solid #333;padding:6px;background:#efefef;text-align:right;font-weight:700;">Total Sales</th>
+                <?php if ($showTotalValues): ?>
+                    <th style="border:1px solid #333;padding:6px;background:#efefef;text-align:right;font-weight:700;">Total Sales</th>
+                <?php endif; ?>
             </tr>
         </thead>
         <tbody>
@@ -68,17 +72,23 @@ function renderBundleReportHtml(array $rows, array $totals, string $dateFrom, st
                 <td style="border:1px solid #333;padding:6px;"><?php echo htmlspecialchars((string)($row['sku'] ?? '')); ?></td>
                 <td style="border:1px solid #333;padding:6px;"><?php echo htmlspecialchars((string)($row['name'] ?? '')); ?></td>
                 <td style="border:1px solid #333;padding:6px;"><?php echo htmlspecialchars((string)($row['size'] ?? '')); ?></td>
-                <td style="border:1px solid #333;padding:6px;text-align:right;"><?php echo is_null($row['reg_price']) ? '' : '$' . number_format((float)$row['reg_price'], 2); ?></td>
-                <td style="border:1px solid #333;padding:6px;text-align:right;"><?php echo is_null($row['sale_price']) ? '' : '$' . number_format((float)$row['sale_price'], 2); ?></td>
+                <?php if ($showUnitPrice): ?>
+                    <td style="border:1px solid #333;padding:6px;text-align:right;"><?php echo is_null($row['reg_price']) ? '' : '$' . number_format((float)$row['reg_price'], 2); ?></td>
+                    <td style="border:1px solid #333;padding:6px;text-align:right;"><?php echo is_null($row['sale_price']) ? '' : '$' . number_format((float)$row['sale_price'], 2); ?></td>
+                <?php endif; ?>
                 <td style="border:1px solid #333;padding:6px;text-align:right;"><?php echo number_format((float)($row['promo_units'] ?? 0)); ?></td>
-                <td style="border:1px solid #333;padding:6px;text-align:right;"><?php echo number_format((float)($row['total_units'] ?? 0)); ?></td>
+                <?php if ($showTotalValues): ?>
+                    <td style="border:1px solid #333;padding:6px;text-align:right;"><?php echo number_format((float)($row['total_units'] ?? 0)); ?></td>
+                <?php endif; ?>
             </tr>
         <?php endforeach; ?>
             <tr style="font-weight:700;background:#f6f6f6;">
-                <td colspan="4" style="border:1px solid #333;padding:6px;text-align:right;">Totals:</td>
-                <td style="border:1px solid #333;padding:6px;"></td>
+                <?php $labelColspan = 3 + ($showUnitPrice ? 2 : 0); ?>
+                <td colspan="<?php echo $labelColspan; ?>" style="border:1px solid #333;padding:6px;text-align:right;">Totals:</td>
                 <td style="border:1px solid #333;padding:6px;text-align:right;"><?php echo number_format((float)$totals['promo_units']); ?></td>
-                <td style="border:1px solid #333;padding:6px;text-align:right;"><?php echo number_format((float)$totals['total_units']); ?></td>
+                <?php if ($showTotalValues): ?>
+                    <td style="border:1px solid #333;padding:6px;text-align:right;"><?php echo number_format((float)$totals['total_units']); ?></td>
+                <?php endif; ?>
             </tr>
         </tbody>
     </table>
@@ -509,7 +519,7 @@ if ($reportType === 'bundle_sales' && $pdfDownload) {
                                 <label>Invoice Number</label>
                                 <div class="invoice-row">
                                     <input type="text" name="invoice_number" id="invoice_number" value="<?php echo htmlspecialchars($invoiceNumber); ?>" <?php echo $invoiceNull ? 'disabled' : ''; ?>>
-                                    <label class="none-check"><input type="checkbox" name="invoice_null" id="invoice_null" value="1" <?php echo $invoiceNull ? 'checked' : ''; ?> onchange="toggleInvoiceField(this)"> NONE</label>
+                                    <label class="none-check"><input type="checkbox" name="invoice_null" id="invoice_null" value="1" <?php echo $invoiceNull ? 'checked' : ''; ?> onchange="toggleInvoiceField(this)"> None</label>
                                 </div>
                             </div>
                             <div class="form-col">
